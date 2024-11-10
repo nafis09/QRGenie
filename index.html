@@ -9,7 +9,7 @@
 <body>
 
 <header class="header">
-    <img src="logoo.png" class="logo">
+    <img src="logoo.png" class="logo" alt="Logo">
 </header>
 
 <div class="container">
@@ -18,37 +18,69 @@
     <p id="errorMsg" class="error-msg">Input required!</p>
 
     <div id="imgBox">
-        <img src="" id="qrImage">
+        <img src="" id="qrImage" alt="QR Code">
     </div>
 
-    <button onclick="generateQR()">Generate QR Code</button>
+    <div class="button-group">
+        <button id="saveBtn" onclick="saveQR()" style="display: none;">Save QR Code</button>
+        <button onclick="generateQR()" id="generateBtn">Generate QR Code</button>
+    </div>
 </div>
+
+<footer class="footer">
+    <p>&copy; 2024 QRGenie. All Rights Reserved.</p>
+</footer>
 
 <script>
 let imgBox = document.getElementById("imgBox");
 let qrImage = document.getElementById("qrImage");
 let qrText = document.getElementById("qrText");
 let errorMsg = document.getElementById("errorMsg");
+let saveBtn = document.getElementById("saveBtn");
+let generateBtn = document.getElementById("generateBtn");
 
 function generateQR() {
     if (qrText.value.trim().length > 0) {
-        qrImage.src = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + qrText.value;
+        let qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" + encodeURIComponent(qrText.value);
+        qrImage.src = qrUrl; 
+
         imgBox.classList.add("show-img");
-        errorMsg.style.display = "none";  // Hide error message
+        errorMsg.style.display = "none";  
+        saveBtn.style.display = "inline-block"; 
+
+        generateBtn.after(saveBtn);
     } else {
         qrText.classList.add('error');
-        errorMsg.style.display = "block";  // Show error message
+        errorMsg.style.display = "block";  
+        saveBtn.style.display = "none"; 
         setTimeout(() => {
             qrText.classList.remove('error');
         }, 1000);
     }
 }
+
+async function saveQR() {
+    if (qrImage.src) {
+        try {
+            let response = await fetch(qrImage.src);
+            let blob = await response.blob();
+            let url = URL.createObjectURL(blob); 
+
+            const link = document.createElement("a");
+            link.href = url; 
+            link.download = "QRGenie-QRCode.png"; 
+            link.click(); 
+
+            URL.revokeObjectURL(url);
+
+        } catch (error) {
+            alert("Error saving QR code: " + error);
+        }
+    } else {
+        alert("Please generate a QR code first!");
+    }
+}
 </script>
-
-<footer class="footer">
-    <p>&copy; 2024 QRGenie. All Rights Reserved.</p>
-</footer>
-
 
 </body>
 </html>
